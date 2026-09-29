@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ app_title }}</title>
+  <meta name="description" content="EduGenie is an intelligent AI-powered educational companion that helps students understand concepts, generate quizzes, summarize notes, and create custom roadmaps.">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Marked.js for Markdown Rendering -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <!-- Ambient background glow elements -->
+  <div class="ambient-glow glow-1"></div>
+  <div class="ambient-glow glow-2"></div>
+  <div class="ambient-glow glow-3"></div>
+
+  <!-- Header Navigation -->
+  <header class="navbar">
+    <div class="nav-container">
+      <div class="logo-group" onclick="showDashboardHome()">
+        <div class="logo-icon-wrap">
+          <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+          </svg>
+          <span class="logo-sparkle">✨</span>
+        </div>
+        <div class="brand-text">
+          <h1 class="logo-title">EduGenie</h1>
+          <span class="logo-subtitle">Your AI-Powered Learning Companion</span>
+        </div>
+      </div>
+
+      <nav class="nav-links">
+        <button class="nav-btn active" data-target="dashboard-section" onclick="navigateTo('dashboard-section')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+          <span>Dashboard</span>
+        </button>
+        <button class="nav-btn" data-target="qna-section" onclick="navigateTo('qna-section')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+          <span>Ask Q&A</span>
+        </button>
+        <button class="nav-btn" data-target="explain-section" onclick="navigateTo('explain-section')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+          <span>Explain</span>
+        </button>
+        <button class="nav-btn" data-target="quiz-section" onclick="navigateTo('quiz-section')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="9" y1="15" x2="15" y2="15"></line></svg>
+          <span>Quiz</span>
+        </button>
+        <button class="nav-btn" data-target="summary-section" onclick="navigateTo('summary-section')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="21" y1="10" x2="3" y2="10"></line><line x1="21" y1="6" x2="3" y2="6"></line><line x1="21" y1="14" x2="3" y2="14"></line><line x1="21" y1="18" x2="7" y2="18"></line></svg>
+          <span>Summarize</span>
+        </button>
+        <button class="nav-btn" data-target="learn-section" onclick="navigateTo('learn-section')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+          <span>Roadmap</span>
+        </button>
+      </nav>
+
+      <div class="nav-actions">
+        <!-- API Status Indicator Pill -->
+        <div class="status-pill {% if api_configured %}status-active{% else %}status-warning{% endif %}" id="apiStatusPill" title="Gemini API Status">
+          <span class="status-dot"></span>
+          <span class="status-text">{% if api_configured %}Gemini AI Active{% else %}API Key Needed{% endif %}</span>
+        </div>
+
+        <!-- Theme Toggle -->
+        <button class="theme-toggle" id="themeToggleBtn" onclick="toggleTheme()" title="Toggle Theme" aria-label="Toggle Theme">
+          <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+          <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="main-content">
+
+    <!-- Flash alert for unconfigured API Key if needed -->
+    {% if not api_configured %}
+    <div class="config-banner" id="configBanner">
+      <div class="banner-icon">⚠️</div>
+      <div class="banner-content">
+        <strong>Gemini API Key is not configured yet.</strong>
+        <span>Please add <code>GEMINI_API_KEY</code> into your <code>.env</code> file to enable live AI responses.</span>
+      </div>
+      <button class="banner-dismiss" onclick="document.getElementById('configBanner').style.display='none'">✕</button>
+    </div>
+    {% endif %}
+
+    <!-- Global Toast Alert Container -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <!-- ============================================== -->
+    <!-- 0. HERO & DASHBOARD CARDS OVERVIEW -->
+    <!-- ============================================== -->
+    <section id="dashboard-section" class="content-section active-section">
+      <div class="hero-card">
+        <div class="hero-badge">
+          <span>🎓</span> Powered by Google Gemini AI
+        </div>
+        <h2 class="hero-title">Accelerate Your Learning with <span class="gradient-text">EduGenie</span></h2>
+        <p class="hero-desc">
+          Your personal 24/7 intelligent study buddy. Ask challenging academic questions, master complex topics, take instant quizzes, condense revision notes, and map out your personalized learning journey.
+        </p>
+
+        <!-- Quick Stats Banner -->
+        <div class="stats-row">
+          <div class="stat-badge">
+            <span class="stat-num">5</span>
+            <span class="stat-label">AI Study Tools</span>
+          </div>
+          <div class="stat-badge">
+            <span class="stat-num">Instant</span>
+            <span class="stat-label">MCQ Generation</span>
+          </div>
+          <div class="stat-badge">
+            <span class="stat-num">Step-by-Step</span>
+            <span class="stat-label">Curriculum Roadmaps</span>
+          </div>
+          <div class="stat-badge">
+            <span class="stat-num">100%</span>
+            <span class="stat-label">Student-Friendly</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Feature Cards Grid (Main Dashboard Cards) -->
+      <div class="feature-grid-header">
+        <h3>Explore Study Modules</h3>
+        <p>Choose an AI assistant tool below to start learning immediately</p>
+      </div>
+
+      <div class="feature-cards-grid">
+        <!-- 1. Ask Question Card -->
+        <div class="feature-card card-purple" onclick="navigateTo('qna-section')">
+          <div class="card-icon-bubble">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+          </div>
+          <div class="card-content">
+            <h4 class="card-title">Ask Question</h4>
+            <p class="card-desc">Ask any academic question and receive clear, step-by-step explanations with relatable examples.</p>
+          </div>
+          <div class="card-footer">
+            <button class="feature-btn">
+              <span>Ask Question</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- 2. Explain Topic Card -->
+        <div class="feature-card card-blue" onclick="navigateTo('explain-section')">
+          <div class="card-icon-bubble">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+          </div>
+          <div class="card-content">
+            <h4 class="card-title">Explain Topic</h4>
+            <p class="card-desc">Break down tough topics into simple beginner definitions, key bullet points, analogies, and quick recaps.</p>
+          </div>
+          <div class="card-footer">
+            <button class="feature-btn">
+              <span>Explain Topic</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- 3. Generate Quiz Card -->
+        <div class="feature-card card-amber" onclick="navigateTo('quiz-section')">
+          <div class="card-icon-bubble">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="9" y1="15" x2="15" y2="15"></line></svg>
+          </div>
+          <div class="card-content">
+            <h4 class="card-title">Generate Quiz</h4>
+            <p class="card-desc">Instantly produce 3 multiple-choice questions with 4 options each, interactive answer checking, and score summary.</p>
+          </div>
+          <div class="card-footer">
+            <button class="feature-btn">
+              <span>Generate Quiz</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- 4. Summarize Material Card -->
+        <div class="feature-card card-emerald" onclick="navigateTo('summary-section')">
+          <div class="card-icon-bubble">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="21" y1="10" x2="3" y2="10"></line><line x1="21" y1="6" x2="3" y2="6"></line><line x1="21" y1="14" x2="3" y2="14"></line><line x1="21" y1="18" x2="7" y2="18"></line></svg>
+          </div>
+          <div class="card-content">
+            <h4 class="card-title">Summarize</h4>
+            <p class="card-desc">Condense long chapters and lecture notes into concise, high-yield exam revision summaries with bulleted takeaways.</p>
+          </div>
+          <div class="card-footer">
+            <button class="feature-btn">
+              <span>Summarize</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- 5. Learning Path Card -->
+        <div class="feature-card card-rose" onclick="navigateTo('learn-section')">
+          <div class="card-icon-bubble">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+          </div>
+          <div class="card-content">
+            <h4 class="card-title">Learning Path</h4>
+            <p class="card-desc">Generate tailored roadmaps from Beginner to Advanced with milestones, practice activities, projects, and resources.</p>
+          </div>
+          <div class="card-footer">
+            <button class="feature-btn">
+              <span>Learning Path</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ============================================== -->
+    <!-- 1. FEATURE SECTION: ASK QUESTION / Q&A -->
+    <!-- ============================================== -->
+    <section id="qna-section" class="content-section">
+      <div class="section-header-row">
+        <button class="back-btn" onclick="navigateTo('dashboard-section')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+          <span>Dashboard</span>
+        </button>
+        <div class="section-title-wrap">
+          <span class="section-tag tag-purple">Module 1</span>
+          <h2>Ask Academic Questions</h2>
+          <p>Get clear, step-by-step answers designed for student understanding.</p>
+        </div>
+      </div>
+
+      <div class="tool-workspace">
+        <div class="tool-card input-panel">
+          <div class="panel-header">
+            <label for="qnaInput" class="input-label">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+              <span>Your Academic Question</span>
+            </label>
+            <div class="prompt-chips">
+              <span class="chip" onclick="setQnaPrompt('Why does ice float on liquid water?')">Ice Floating</span>
+              <span class="chip" onclick="setQnaPrompt('Explain how binary search works step by step.')">Binary Search</span>
+              <span class="chip" onclick="setQnaPrompt('What caused World War I in simple terms?')">WWI Origins</span>
+            </div>
+          </div>
+
+          <textarea id="qnaInput" class="app-textarea" placeholder="e.g., Why do we experience different seasons on Earth? Explain with a simple example..." rows="4"></textarea>
+
+          <div class="panel-actions">
+            <button class="btn btn-secondary" onclick="clearQna()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+              <span>Clear</span>
+            </button>
+            <button id="qnaSubmitBtn" class="btn btn-primary" onclick="submitQnA()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+              <span>Ask EduGenie</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Result Card for Q&A -->
+        <div id="qnaResultCard" class="tool-card result-panel empty-state">
+          <div class="empty-placeholder">
+            <div class="placeholder-icon">💡</div>
+            <h3>Your answer will appear here</h3>
+            <p>Ask any academic question above and EduGenie will craft a tailored explanation with examples.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ============================================== -->
+    <!-- 2. FEATURE SECTION: EXPLAIN A TOPIC -->
+    <!-- ============================================== -->
+    <section id="explain-section" class="content-section">
+      <div class="section-header-row">
+        <button class="back-btn" onclick="navigateTo('dashboard-section')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+          <span>Dashboard</span>
+        </button>
+        <div class="section-title-wrap">
+          <span class="section-tag tag-blue">Module 2</span>
+          <h2>Explain a Topic in Simple Language</h2>
+          <p>Get a beginner-friendly definition, key points, real-world example, and short recap.</p>
+        </div>
+      </div>
+
+      <div class="tool-workspace">
+        <div class="tool-card input-panel">
+          <div class="panel-header">
+            <label for="explainInput" class="input-label">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+              <span>Enter a Difficult Topic</span>
+            </label>
+            <div class="prompt-chips">
+              <span class="chip" onclick="setExplainTopic('Quantum Entanglement')">Quantum Entanglement</span>
+              <span class="chip" onclick="setExplainTopic('Recursion in Programming')">Recursion</span>
+              <span class="chip" onclick="setExplainTopic('Inflation and Interest Rates')">Inflation</span>
+              <span class="chip" onclick="setExplainTopic('Plate Tectonics')">Plate Tectonics</span>
+            </div>
+          </div>
+
+          <div class="input-wrapper">
+            <input type="text" id="explainInput" class="app-input" placeholder="e.g. Recursion, Photosynthesis, Black Holes, Supply and Demand...">
+          </div>
+
+          <div class="panel-actions">
+            <button class="btn btn-secondary" onclick="clearExplain()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+              <span>Clear</span>
+            </button>
+            <button id="explainSubmitBtn" class="btn btn-primary" onclick="submitExplain()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+              <span>Explain Topic</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Result Card for Explain -->
+        <div id="explainResultCard" class="tool-card result-panel empty-state">
+          <div class="empty-placeholder">
+            <div class="placeholder-icon">📖</div>
+            <h3>Topic breakdown ready to generate</h3>
+            <p>Enter any topic above to view a definition, core key points, everyday analogy, and revision summary.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ============================================== -->
+    <!-- 3. FEATURE SECTION: QUIZ GENERATOR -->
+    <!-- ============================================== -->
+    <section id="quiz-section" class="content-section">
+      <div class="section-header-row">
+        <button class="back-btn" onclick="navigateTo('dashboard-section')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+          <span>Dashboard</span>
+        </button>
+        <div class="section-title-wrap">
+          <span class="section-tag tag-amber">Module 3</span>
+          <h2>Interactive Quiz Generator</h2>
+          <p>Generate exactly 3 multiple-choice questions with instant answer feedback and live score tracking.</p>
+        </div>
+      </div>
+
+      <div class="tool-workspace">
+        <div class="tool-card input-panel">
+          <div class="panel-header">
+            <label for="quizInput" class="input-label">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="9" y1="15" x2="15" y2="15"></line></svg>
+              <span>Quiz Topic or Study Notes</span>
+            </label>
+            <div class="prompt-chips">
+              <span class="chip" onclick="setQuizTopic('Python Programming Basics')">Python Basics</span>
+              <span class="chip" onclick="setQuizTopic('The Human Circulatory System')">Circulatory System</span>
+              <span class="chip" onclick="setQuizTopic('World War II Major Events')">WWII Events</span>
+              <span class="chip" onclick="setQuizTopic('Newtonian Mechanics and Forces')">Physics Forces</span>
+            </div>
+          </div>
+
+          <textarea id="quizInput" class="app-textarea" placeholder="Enter a subject, chapter name, or paste your notes to generate 3 MCQs..." rows="4"></textarea>
+
+          <div class="panel-actions">
+            <button class="btn btn-secondary" onclick="clearQuiz()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+              <span>Clear</span>
+            </button>
+            <button id="quizSubmitBtn" class="btn btn-primary" onclick="submitQuiz()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+              <span>Generate Quiz (3 MCQs)</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Result Card for Quiz -->
+        <div id="quizResultCard" class="tool-card result-panel empty-state">
+          <div class="empty-placeholder">
+            <div class="placeholder-icon">🎯</div>
+            <h3>Test your knowledge</h3>
+            <p>Provide a topic or paste material above to generate a 3-question MCQ quiz with immediate scoring.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ============================================== -->
+    <!-- 4. FEATURE SECTION: SUMMARIZER -->
+    <!-- ============================================== -->
+    <section id="summary-section" class="content-section">
+      <div class="section-header-row">
+        <button class="back-btn" onclick="navigateTo('dashboard-section')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+          <span>Dashboard</span>
+        </button>
+        <div class="section-title-wrap">
+          <span class="section-tag tag-emerald">Module 4</span>
+          <h2>Study Material Summarizer</h2>
+          <p>Condense lengthy paragraphs and textbook excerpts into high-yield exam revision notes.</p>
+        </div>
+      </div>
+
+      <div class="tool-workspace">
+        <div class="tool-card input-panel">
+          <div class="panel-header">
+            <label for="summaryInput" class="input-label">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="21" y1="10" x2="3" y2="10"></line><line x1="21" y1="6" x2="3" y2="6"></line><line x1="21" y1="14" x2="3" y2="14"></line><line x1="21" y1="18" x2="7" y2="18"></line></svg>
+              <span>Paste Study Text / Paragraph</span>
+            </label>
+            <div class="word-counter-badge" id="inputWordCount">0 words</div>
+          </div>
+
+          <textarea id="summaryInput" class="app-textarea" oninput="updateWordCount()" placeholder="Paste articles, lecture transcripts, or textbook chapters here..." rows="6"></textarea>
+
+          <div class="panel-helper-row">
+            <button class="sample-prompt-link" onclick="loadSampleSummaryText()">
+              <span>📋 Paste Sample Study Text (Photosynthesis)</span>
+            </button>
+          </div>
+
+          <div class="panel-actions">
+            <button class="btn btn-secondary" onclick="clearSummary()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+              <span>Clear</span>
+            </button>
+            <button id="summarySubmitBtn" class="btn btn-primary" onclick="submitSummary()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+              <span>Summarize Notes</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Result Card for Summary -->
+        <div id="summaryResultCard" class="tool-card result-panel empty-state">
+          <div class="empty-placeholder">
+            <div class="placeholder-icon">📝</div>
+            <h3>Concise revision summary will appear here</h3>
+            <p>Paste notes on the left to extract core definitions, facts, and exam takeaways.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ============================================== -->
+    <!-- 5. FEATURE SECTION: LEARNING PATH -->
+    <!-- ============================================== -->
+    <section id="learn-section" class="content-section">
+      <div class="section-header-row">
+        <button class="back-btn" onclick="navigateTo('dashboard-section')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+          <span>Dashboard</span>
+        </button>
+        <div class="section-title-wrap">
+          <span class="section-tag tag-rose">Module 5</span>
+          <h2>Personalized Learning Roadmap</h2>
+          <p>Generate a step-by-step master plan with milestones, projects, practice activities, and resources.</p>
+        </div>
+      </div>
+
+      <div class="tool-workspace">
+        <div class="tool-card input-panel">
+          <div class="panel-header">
+            <label for="learnTopicInput" class="input-label">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+              <span>Topic to Master</span>
+            </label>
+            <div class="prompt-chips">
+              <span class="chip" onclick="setLearnTopic('Python Programming')">Python</span>
+              <span class="chip" onclick="setLearnTopic('SQL & Relational Databases')">SQL</span>
+              <span class="chip" onclick="setLearnTopic('Data Structures & Algorithms')">Data Structures</span>
+              <span class="chip" onclick="setLearnTopic('Machine Learning Fundamentals')">Machine Learning</span>
+            </div>
+          </div>
+
+          <div class="input-wrapper">
+            <input type="text" id="learnTopicInput" class="app-input" placeholder="e.g. Python Programming, SQL, Machine Learning, Organic Chemistry...">
+          </div>
+
+          <!-- Learner Level Selector -->
+          <div class="level-selection-group">
+            <label class="level-label">Select Your Current Level:</label>
+            <div class="level-pills">
+              <label class="level-pill active">
+                <input type="radio" name="learnerLevel" value="Beginner" checked onchange="updateLevelPills(this)">
+                <span class="pill-dot">🟢</span>
+                <span class="pill-title">Beginner</span>
+                <span class="pill-sub">Zero / Little Knowledge</span>
+              </label>
+              <label class="level-pill">
+                <input type="radio" name="learnerLevel" value="Intermediate" onchange="updateLevelPills(this)">
+                <span class="pill-dot">🟡</span>
+                <span class="pill-title">Intermediate</span>
+                <span class="pill-sub">Knows Fundamentals</span>
+              </label>
+              <label class="level-pill">
+                <input type="radio" name="learnerLevel" value="Advanced" onchange="updateLevelPills(this)">
+                <span class="pill-dot">🟣</span>
+                <span class="pill-title">Advanced</span>
+                <span class="pill-sub">Looking for Mastery</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="panel-actions">
+            <button class="btn btn-secondary" onclick="clearLearn()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+              <span>Clear</span>
+            </button>
+            <button id="learnSubmitBtn" class="btn btn-primary" onclick="submitLearningPath()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+              <span>Build Roadmap</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Result Card for Learning Path -->
+        <div id="learnResultCard" class="tool-card result-panel empty-state">
+          <div class="empty-placeholder">
+            <div class="placeholder-icon">🗺️</div>
+            <h3>Your roadmap is ready to build</h3>
+            <p>Pick a topic and skill level on the left to receive a custom curriculum with practical milestones and projects.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="app-footer">
+    <div class="footer-container">
+      <div class="footer-brand">
+        <span class="logo-title">EduGenie</span> – AI Learning Assistant &copy; 2026
+      </div>
+      <div class="footer-meta">
+        Built with FastAPI &middot; Google Gemini &middot; Jinja2 &middot; HTML5/CSS3
+      </div>
+    </div>
+  </footer>
+
+  <!-- Main JavaScript Application Logic -->
+  <script src="/static/script.js"></script>
+</body>
+</html>
